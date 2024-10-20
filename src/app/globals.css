@@ -25,3 +25,9 @@ body {
     text-wrap: balance;
   }
 }
+
+@layer components {
+  .stock-display {
+    @apply bg-white dark:bg-gray-800 shadow rounded-lg p-4;
+  }
+}
