@@ -85,13 +85,32 @@ const StockChart: React.FC<StockChartProps> = ({ symbol }) => {
   const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
+    scales: {
+      x: {
+        grid: {
+          color: '#333333',
+        },
+        ticks: {
+          color: '#00ff00',
+        },
+      },
+      y: {
+        grid: {
+          color: '#333333',
+        },
+        ticks: {
+          color: '#00ff00',
+        },
+      },
+    },
     plugins: {
       legend: {
-        position: 'top' as const,
+        display: false,
       },
       title: {
         display: true,
         text: `${symbol} Stock Price History`,
+        color: '#ffff00',
       },
     },
   };

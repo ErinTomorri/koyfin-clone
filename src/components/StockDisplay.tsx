@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import StockChart from './StockChart';
 import StockPriceDisplay from "./StockPriceDisplay";
+import Fortune500List from './Fortune500List';
 
 interface StockData {
   symbol: string;
@@ -49,31 +50,32 @@ const StockDisplay: React.FC = () => {
   }, [stockData]);
 
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="space-y-6">
       <form onSubmit={handleSubmit} className="flex space-x-2">
         <input
           type="text"
           value={symbol}
           onChange={(e) => setSymbol(e.target.value.toUpperCase())}
           placeholder="Enter stock symbol"
-          className="border p-2 rounded"
+          className="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
         />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+        <button type="submit" className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors">
           Fetch Stock Data
         </button>
       </form>
-      {loading && <div>Loading...</div>}
+      {loading && <div className="text-secondary">Loading...</div>}
       {error && <div className="text-red-500">{error}</div>}
       {stockData && (
-        <div className="flex space-x-4">
-          <div className="w-2/3">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="md:col-span-3 bg-white shadow rounded-lg p-6">
             <StockChart symbol={symbol} />
           </div>
-          <div className="w-1/3">
+          <div className="bg-white shadow rounded-lg p-6">
             <StockPriceDisplay stockData={stockData} />
           </div>
         </div>
       )}
+      <Fortune500List />
     </div>
   );
 };
