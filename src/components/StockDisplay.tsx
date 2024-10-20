@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import StockChart from './StockChart';
+import StockPriceDisplay from "./StockPriceDisplay";
 
 interface StockData {
   symbol: string;
@@ -11,51 +12,68 @@ interface StockData {
   regularMarketDayLow: number;
 }
 
-const StockDisplay: React.FC<{ symbol: string }> = ({ symbol }) => {
+const StockDisplay: React.FC = () => {
+  const [symbol, setSymbol] = useState<string>('');
   const [stockData, setStockData] = useState<StockData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchStockData = async () => {
-      try {
-        const response = await fetch(`/api/stock?symbol=${symbol}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch stock data');
-        }
-        const data = await response.json();
-        setStockData(data);
-        setLoading(false);
-      } catch (err) {
-        setError('Error fetching stock data');
-        setLoading(false);
+  const fetchStockData = async () => {
+    if (!symbol) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/stock?symbol=${symbol}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch stock data');
       }
-    };
+      const data = await response.json();
+      setStockData(data);
+    } catch (err) {
+      setError('Error fetching stock data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     fetchStockData();
-    const interval = setInterval(fetchStockData, 60000); // Refresh every minute
+  };
 
-    return () => clearInterval(interval);
-  }, [symbol]);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
-  if (!stockData) return null;
+  useEffect(() => {
+    if (stockData) {
+      const interval = setInterval(fetchStockData, 60000); // Refresh every minute
+      return () => clearInterval(interval);
+    }
+  }, [stockData]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
-      <h2 className="text-xl font-bold mb-2">{stockData.symbol}</h2>
-      <p className="text-2xl font-semibold">${stockData.regularMarketPrice.toFixed(2)}</p>
-      <p className={`text-sm ${stockData.regularMarketChangePercent >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-        {stockData.regularMarketChangePercent.toFixed(2)}%
-      </p>
-      <div className="mt-2">
-        <p>High: ${stockData.regularMarketDayHigh.toFixed(2)}</p>
-        <p>Low: ${stockData.regularMarketDayLow.toFixed(2)}</p>
-      </div>
-      <div className="mt-4">
-        <StockChart symbol={symbol} />
-      </div>
+    <div className="flex flex-col space-y-4">
+      <form onSubmit={handleSubmit} className="flex space-x-2">
+        <input
+          type="text"
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+          placeholder="Enter stock symbol"
+          className="border p-2 rounded"
+        />
+        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+          Fetch Stock Data
+        </button>
+      </form>
+      {loading && <div>Loading...</div>}
+      {error && <div className="text-red-500">{error}</div>}
+      {stockData && (
+        <div className="flex space-x-4">
+          <div className="w-2/3">
+            <StockChart symbol={symbol} />
+          </div>
+          <div className="w-1/3">
+            <StockPriceDisplay stockData={stockData} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

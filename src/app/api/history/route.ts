@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import yahooFinance from 'yahoo-finance2';
 
-type Interval = '1d' | '1wk' | '1mo' ;
+type Interval = '1d' | '1wk' | '1mo';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,10 +13,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    const queryOptions = {
-      period1: getStartDate(interval),
-      interval: interval,
-    }
+    const startDate = getStartDate(interval);
+    const queryOptions = { period1: startDate };
 
     const result = await yahooFinance.historical(symbol, queryOptions);
     return NextResponse.json(result);

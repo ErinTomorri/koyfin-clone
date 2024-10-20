@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type Interval = '5m' | '30m' | '1h' | '5h' | '1d' | '1wk' | '1mo' | '1y' | 'max';
+export type Interval =  '1d' | '1wk' | '1mo' ;
 
 interface IntervalSelectorProps {
   selectedInterval: Interval;
@@ -8,7 +8,7 @@ interface IntervalSelectorProps {
 }
 
 const IntervalSelector: React.FC<IntervalSelectorProps> = ({ selectedInterval, onIntervalChange }) => {
-  const intervals: Interval[] = ['5m', '30m', '1h', '5h', '1d', '1wk', '1mo', '1y', 'max'];
+  const intervals: Interval[] = ['1d', '1wk', '1mo'];
 
   return (
     <div className="flex gap-2 mb-4">

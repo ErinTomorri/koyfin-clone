@@ -40,9 +40,11 @@ interface ChartData {
 const StockChart: React.FC<StockChartProps> = ({ symbol }) => {
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [selectedInterval, setSelectedInterval] = useState<Interval>('1d');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchHistoricalData = async () => {
+      setError(null);
       try {
         const response = await fetch(`/api/stock/history?symbol=${symbol}&interval=${selectedInterval}`);
         if (!response.ok) {
@@ -50,6 +52,11 @@ const StockChart: React.FC<StockChartProps> = ({ symbol }) => {
         }
         const data = await response.json();
         
+        if (data.length === 0) {
+          setError('No historical data available for this period');
+          return;
+        }
+
         const labels = data.map((item: any) => new Date(item.date).toLocaleString());
         const prices = data.map((item: any) => item.close);
 
@@ -66,14 +73,18 @@ const StockChart: React.FC<StockChartProps> = ({ symbol }) => {
         });
       } catch (error) {
         console.error('Error fetching historical data:', error);
+        setError('Failed to fetch historical data. Please try again.');
       }
     };
 
-    fetchHistoricalData();
+    if (symbol) {
+      fetchHistoricalData();
+    }
   }, [symbol, selectedInterval]);
 
   const options: ChartOptions<'line'> = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
@@ -85,12 +96,16 @@ const StockChart: React.FC<StockChartProps> = ({ symbol }) => {
     },
   };
 
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
+
   if (!chartData) {
     return <div>Loading chart...</div>;
   }
 
   return (
-    <div>
+    <div className="h-[400px]">
       <IntervalSelector
         selectedInterval={selectedInterval}
         onIntervalChange={setSelectedInterval}
